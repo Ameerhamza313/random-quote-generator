@@ -1,11 +1,11 @@
-const quote = document.getElementById("quote");
-const author = document.getElementById("author");
-const api_url = "https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json";
+const quoteElement = document.getElementById("quote");
+const authorElement = document.getElementById("author");
+const api_url = "https://backend-6ezq.onrender.com/api/quotes";
 
-async function getQuote(url) {
+async function getQuote() {
     try {
-        const response = await fetch(url, { method: "GET", redirect: "follow" });
-        
+        const response = await fetch(api_url, { method: "GET", redirect: "follow" });
+
         // Check if the response is ok
         if (!response.ok) {
             throw new Error('Network response was not ok ' + response.statusText);
@@ -13,23 +13,26 @@ async function getQuote(url) {
 
         const data = await response.json();
 
-        // Check if the API response has the expected structure
-        if (data.quoteText) {
-            quote.innerHTML = data.quoteText;
-            author.innerHTML = data.quoteAuthor || "Unknown";
+        // Assuming the response structure is as shown:
+        if (data && data.length > 0 && data[0].quote) {
+            quoteElement.innerHTML = data[0].quote;
+            authorElement.innerHTML = data[0].author || "Unknown";
         } else {
             throw new Error('Invalid data format');
         }
     } catch (error) {
         console.error('Error fetching the quote:', error);
-        quote.innerHTML = "Error fetching quote";
-        author.innerHTML = "";
+        quoteElement.innerHTML = "Error fetching quote";
+        authorElement.innerHTML = "";
     }
 }
 
-getQuote(api_url);
+document.getElementById("new-quote").addEventListener("click", getQuote);
 
 function tweet() {
-    const tweetText = `“${quote.innerHTML}” — by ${author.innerHTML}`;
+    const tweetText = `“${quoteElement.innerHTML}” — by ${authorElement.innerHTML}`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, "Tweet Window", "width=300,height=300");
 }
+
+// Initial quote fetch on page load
+getQuote();
